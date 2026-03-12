@@ -18,14 +18,15 @@ resources:
 
 persistence:
   enabled: true
-  storageClassName: standard
+  storageClassName: ""  # leave empty to use cluster default storage class
   size: 10Gi
   mountPath: /var/lib/postgresql/data
 
 env:
   POSTGRES_DB: ledger_db
   POSTGRES_USER: ledger_user
-  POSTGRES_INITDB_ARGS: "-c log_statement=all -c log_min_duration_statement=1000 -c synchronous_commit=on"
+  POSTGRES_PASSWORD: ledgerpass
+  # POSTGRES_INITDB_ARGS removed; use configmap for server settings
 
 backup:
   enabled: true

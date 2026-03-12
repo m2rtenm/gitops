@@ -28,14 +28,15 @@ autoscaling:
 env:
   SERVICE_NAME: fraud-detection-service
   LOG_LEVEL: INFO
-  KAFKA_BROKERS: kafka-broker-0.kafka-headless:9092,kafka-broker-1.kafka-headless:9092,kafka-broker-2.kafka-headless:9092
+  KAFKA_BROKERS: kafka-broker-0.kafka-headless.strimzi-system.svc.cluster.local:9092,kafka-broker-1.kafka-headless.strimzi-system.svc.cluster.local:9092,kafka-broker-2.kafka-headless.strimzi-system.svc.cluster.local:9092
   KAFKA_TOPIC_TRANSACTIONS: fintech.transactions
   KAFKA_TOPIC_ALERTS: fintech.fraud-alerts
   KAFKA_CONSUMER_GROUP: fraud-detection-service
-  POSTGRES_HOST: postgres-audit
+  POSTGRES_HOST: postgres-audit.fintech-infra.svc.cluster.local
   POSTGRES_PORT: "5432"
   POSTGRES_DB: audit_db
   POSTGRES_USER: audit_user
+  POSTGRES_PASSWORD: auditpass
 
 ingress:
   enabled: true

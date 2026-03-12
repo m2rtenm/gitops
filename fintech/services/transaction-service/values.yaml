@@ -28,14 +28,15 @@ autoscaling:
 env:
   SERVICE_NAME: transaction-service
   LOG_LEVEL: INFO
-  KAFKA_BROKERS: kafka-broker-0.kafka-headless:9092,kafka-broker-1.kafka-headless:9092,kafka-broker-2.kafka-headless:9092
+  KAFKA_BROKERS: kafka-broker-0.kafka-headless.strimzi-system.svc.cluster.local:9092,kafka-broker-1.kafka-headless.strimzi-system.svc.cluster.local:9092,kafka-broker-2.kafka-headless.strimzi-system.svc.cluster.local:9092
   KAFKA_TOPIC_TRANSACTIONS: fintech.transactions
   KAFKA_TOPIC_EVENTS: fintech.transaction-events
   KAFKA_CONSUMER_GROUP: transaction-service
-  POSTGRES_HOST: postgres-accounts
+  POSTGRES_HOST: postgres-accounts.fintech-infra.svc.cluster.local
   POSTGRES_PORT: "5432"
   POSTGRES_DB: accounts_db
   POSTGRES_USER: accounts_user
+  POSTGRES_PASSWORD: accountspass
 
 ingress:
   enabled: true

@@ -81,6 +81,12 @@ Real-time fraud detection and prevention.
 
 ## 📋 Prerequisites
 
+The examples below assume a Kubernetes context named `minikube` or
+`docker-desktop`. Docker Desktop’s built-in cluster uses the same Docker
+engine as your host, so you can build images locally and the cluster will
+see them without further configuration. For minikube you need to configure
+`docker-env` as shown.
+
 - **minikube** (or any Kubernetes cluster)
 - **kubectl** 1.24+
 - **helm** 3.10+
@@ -113,6 +119,40 @@ kubectl port-forward svc/argocd-server -n argocd 8080:443
 - Password: (from the script output)
 
 ### 3. Setup Fintech System
+
+> **PVC issue**: If the `postgres-accounts` release stays in
+> `pending-install` because its PVC can't bind, make sure your cluster has a
+> storage class matching `persistence.storageClassName` (defaults to
+> `standard`). For minikube you can leave the field blank to use the default
+> class – the values files ship with `storageClassName: ""` for this reason.
+
+### 3. Build & Push Images (required before deployment)
+
+The Kubernetes cluster must be able to pull the service images listed in the
+`fintech/services/*/values.yaml` files. By default they reference
+`fintech/<service>:1.0.0`.
+
+```bash
+# build locally; will also work with minikube if you run in its docker-env
+make build-services
+# if using an external registry:
+#   docker push fintech/account-service:1.0.0
+#   docker push fintech/transaction-service:1.0.0
+#   ...
+```
+
+If you are deploying to **minikube**, switch the Docker environment so the
+cluster can see the freshly-built images instead of pulling from the network:
+
+```bash
+eval $(minikube docker-env)
+make build-services
+```
+
+> **Note:** `make setup-fintech` does not build images; run the build step first
+> or the pods will enter `ImagePullBackOff`.
+
+### 4. Setup Fintech System
 
 ```bash
 scripts/setup-fintech.sh

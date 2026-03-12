@@ -36,7 +36,20 @@ echo "================================"
 echo "All services built successfully!"
 echo "================================"
 echo ""
-echo "To push to registry:"
+
+# If using minikube, you may wish to build into minikube's docker
+# daemon so the cluster can pull the images without pushing. Docker Desktop
+# does not require this step because it uses the same engine as the host.
+if command -v minikube >/dev/null 2>&1; then
+  if minikube status >/dev/null 2>&1; then
+    echo "Note: images built in local docker daemon."
+    echo "If deploying to Minikube, run:"
+    echo "  eval \$(minikube docker-env)"
+    echo "  ./scripts/build-services.sh"              
+  fi
+fi
+
+echo "To push to external registry (if not using minikube):"
 for service in "${SERVICES[@]}"; do
   echo "  docker push $DOCKER_REGISTRY/$service:$DOCKER_TAG"
 done

@@ -18,14 +18,15 @@ resources:
 
 persistence:
   enabled: true
-  storageClassName: standard
+  storageClassName: ""  # leave empty to use cluster default storage class
   size: 5Gi
   mountPath: /var/lib/postgresql/data
 
 env:
   POSTGRES_DB: audit_db
   POSTGRES_USER: audit_user
-  POSTGRES_INITDB_ARGS: "-c log_statement=all"
+  POSTGRES_PASSWORD: auditpass
+  # POSTGRES_INITDB_ARGS removed; see chart documentation for alternatives
 
 backup:
   enabled: true

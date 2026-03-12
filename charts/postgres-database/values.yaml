@@ -25,7 +25,12 @@ persistence:
 env:
   POSTGRES_DB: database
   POSTGRES_USER: dbuser
-  POSTGRES_INITDB_ARGS: "-c log_statement=all"
+  # set the superuser password; required by the official image
+  # e.g. POSTGRES_PASSWORD: "securepass"
+  # you can also set this in your service-specific values file
+  # POSTGRES_INITDB_ARGS can be added here if desired, but note that
+  # initdb does not accept '-c'; use a custom configmap instead for
+  # server parameters.
 
 backup:
   enabled: true

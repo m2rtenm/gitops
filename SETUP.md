@@ -1,5 +1,11 @@
 # Fintech System - Complete Setup Guide
 
+> **Note for Docker Desktop users:** the Docker Desktop Kubernetes cluster
+> shares the host’s container runtime, so any images you build locally are
+> immediately available to the cluster. No `minikube docker-env` step is
+> needed. If you switch to minikube later, follow the instructions below to
+> point your shell at minikube’s daemon.
+
 This guide walks through setting up and deploying the complete fintech banking system.
 
 ## 📋 Table of Contents
@@ -11,6 +17,19 @@ This guide walks through setting up and deploying the complete fintech banking s
 6. [Troubleshooting](#troubleshooting)
 
 ---
+
+## Local Development
+
+> **PVC warnings**
+> If a PostgreSQL Pod remains in `Pending` with `Pod has unbound
+> immediate PersistentVolumeClaims`, it means the PVC could not be
+> provisioned. This usually happens when the `storageClassName` in the
+> values files (default `standard`) doesn't exist on your cluster. You
+> can either create the class in your cluster, or set
+> `persistence.storageClassName: ""` in the appropriate
+> `fintech/infra/values-postgres-*.yaml` file to use the default class.
+> After adjusting values delete any stuck PVCs and rerun
+> `make setup-fintech`.
 
 ## Local Development
 
@@ -89,6 +108,27 @@ minikube addons enable metrics-server
 # Enable ingress (optional)
 minikube addons enable ingress
 ```
+
+### Build & Push Service Images
+
+Before deploying to Kubernetes, ensure the container images referenced by the
+Helm values have been built and are accessible from the cluster. By default
+those values point at `fintech/<service>:1.0.0`.
+
+```bash
+# build locally
+make build-services
+
+# when using minikube, instruct docker to build inside the cluster daemon:
+eval $(minikube docker-env)
+make build-services
+
+# if you are using an external registry, push the images afterwards:
+# docker push fintech/account-service:1.0.0  # etc.
+```
+
+> `make setup-fintech` does **not** build images; run the above step first or
+your pods will fail with `ImagePullBackOff`.
 
 ### Install Required Components
 
