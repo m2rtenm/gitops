@@ -79,7 +79,82 @@ Real-time fraud detection and prevention.
   - `GET /api/v1/alerts` - Get fraud alerts
   - `POST /api/v1/alerts/{id}/review` - Review alert
 
-## 📋 Prerequisites
+## � Service Integration
+
+### Complete Transaction Flow
+
+```
+User/Client submits transaction
+       ↓
+Account Service validates accounts
+       ↓
+Transaction Service creates & publishes fintech.transaction-events
+       ├→ Ledger Service: Records immutable entry, updates balance
+       ├→ Fraud Detection: Analyzes for suspicious patterns  
+       └→ Settlement Service: Queues for settlement
+       ↓
+Fraud Check:
+  - If risk_score ≥ 0.7 → Block, alert analyst
+  - If approved → Continue
+       ↓
+Settlement Service:
+  - Groups into daily batches
+  - Publishes fintech.settlement-events
+       ↓
+Reconciliation:
+  - Verifies batch balances
+  - Updates Account Service final balances
+       ↓
+Complete
+```
+
+### Kafka Event Bus
+
+| Topic | Publisher | Consumers | Purpose |
+|-------|-----------|-----------|---------|
+| `fintech.accounts` | Account Service | Ledger, Fraud | Account changes |
+| `fintech.account-events` | Account Service | Ledger, Settlement | Account state changes |
+| `fintech.transactions` | Transaction Service | Ledger, Fraud, Settlement | Transaction data |
+| `fintech.transaction-events` | Transaction Service | Settlement, Fraud | Transaction confirmations |
+| `fintech.ledger` | Ledger Service | Settlement, Fraud | Ledger entries |
+| `fintech.ledger-events` | Ledger Service | Settlement | Balance updates |
+| `fintech.settlement` | Settlement Service | Account, Audit | Settlement notifications |
+| `fintech.settlement-events` | Settlement Service | Account | Settlement confirmations |
+| `fintech.fraud-alerts` | Fraud Detection | Settlement, Account | Fraud alerts |
+
+### Service-to-Service Communication
+
+**Synchronous** (REST):
+- Account Service provides account validation endpoints
+
+**Asynchronous** (Kafka):
+- All services publish state changes to topics
+- Subscribers consume and react independently
+- Enables loose coupling and scalability
+
+### Database Sharing
+
+| Database | Services | Type |
+|----------|----------|------|
+| postgres-accounts | Account, Transaction | Transactional |
+| postgres-ledger | Ledger, Settlement | Append-only + State |
+| postgres-audit | Fraud Detection | Audit trail |
+
+### Configuration for Integration
+
+Each service is deployed with environment variables pointing to:
+- **Kafka brokers**: `kafka-broker-*.kafka-headless.strimzi-system.svc.cluster.local:9092`
+- **Databases**: `postgres-{name}.fintech-infra.svc.cluster.local`
+- **Topics**: Configured in `fintech/services/{service}/values.yaml`
+
+See each service's **README.md** for detailed integration documentation:
+- [Account Service README](services/account-service/README.md)
+- [Transaction Service README](services/transaction-service/README.md)
+- [Ledger Service README](services/ledger-service/README.md)
+- [Settlement Service README](services/settlement-service/README.md)
+- [Fraud Detection Service README](services/fraud-detection-service/README.md)
+
+## �📋 Prerequisites
 
 The examples below assume a Kubernetes context named `minikube` or
 `docker-desktop`. Docker Desktop’s built-in cluster uses the same Docker
