@@ -25,7 +25,7 @@ syncPolicy:
 
 template:
   source:
-    repoURL: https://github.com/your-org/gitops
+    repoURL: https://github.com/m2rtenm/gitops
     targetRevision: main
     path: charts/base-service
   destination:

@@ -3,8 +3,8 @@ project:
   name: fintech
   description: Fintech Banking System - Account, Transaction, Ledger, Settlement and Fraud Detection
   sourceRepos:
-    - 'https://github.com/your-org/fintech-services'
-    - 'https://github.com/your-org/gitops'
+    - 'https://github.com/m2rtenm/fintech-services'
+    - 'https://github.com/m2rtenm/gitops'
   destinations:
     - namespace: fintech
       server: https://kubernetes.default.svc
@@ -17,11 +17,11 @@ project:
         - 'p, proj:fintech:developer, applications, get, fintech/*, allow'
         - 'p, proj:fintech:developer, applications, sync, fintech/*, allow'
       groups:
-        - 'your-org:fintech-developers'
+        - 'm2rtenm:fintech-developers'
     - name: admin
       description: Admin access to fintech project
       policies:
         - 'p, proj:fintech:admin, applications, *, fintech/*, allow'
         - 'p, proj:fintech:admin, repositories, *, *, allow'
       groups:
-        - 'your-org:fintech-admins'
+        - 'm2rtenm:fintech-admins'

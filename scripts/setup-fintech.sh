@@ -9,8 +9,8 @@ PG_AUDIT="postgres-audit"
 PROJECT_RELEASE="fintech-project"
 APPSET_RELEASE="fintech-appset"
 
-GITOPS_REPO="${GITOPS_REPO:-https://github.com/your-org/gitops}"
-SERVICES_REPO="${SERVICES_REPO:-https://github.com/your-org/fintech-services}"
+GITOPS_REPO="${GITOPS_REPO:-https://github.com/m2rtenm/gitops}"
+SERVICES_REPO="${SERVICES_REPO:-https://github.com/m2rtenm/fintech-services}"
 
 echo "================================"
 echo "Fintech System Setup"
