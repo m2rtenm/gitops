@@ -1,6 +1,6 @@
 {{- range .Values.topics }}
 ---
-apiVersion: kafka.strimzi.io/v1beta2
+apiVersion: kafka.strimzi.io/v1
 kind: KafkaTopic
 metadata:
   name: {{ .name }}
@@ -9,7 +9,7 @@ metadata:
     app: fintech
 spec:
   partitions: {{ .partitions | default 1 }}
-  replicationFactor: {{ .replicationFactor | default 1 }}
+  replicas: {{ .replicas | default 1 }}
   {{- if .config }}
   config:
     {{- toYaml .config | nindent 4 }}
