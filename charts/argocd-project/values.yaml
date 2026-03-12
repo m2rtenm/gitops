@@ -1,0 +1,10 @@
+namespace: argocd
+project:
+  name: default
+  description: ""
+  sourceRepos:
+    - '*'
+  destinations:
+    - namespace: default
+      server: https://kubernetes.default.svc
+  roles: []

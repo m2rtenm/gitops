@@ -1,0 +1,6 @@
+apiVersion: v2
+name: base-service
+description: Base microservice Helm chart for fintech services
+type: application
+version: 1.0.0
+appVersion: "1.0.0"

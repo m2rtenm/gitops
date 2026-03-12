@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: {{ .Values.project.name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  description: {{ .Values.project.description }}
+  sourceRepos:
+    {{- range .Values.project.sourceRepos }}
+    - {{ quote . }}
+    {{- end }}
+  destinations:
+    {{- range .Values.project.destinations }}
+    - namespace: {{ quote .namespace }}
+      server: {{ quote .server }}
+    {{- end }}
+  {{- if .Values.project.roles }}
+  roles:
+    {{- range .Values.project.roles }}
+    - name: {{ .name }}
+      description: {{ .description }}
+      policies:
+        {{- range .policies }}
+        - {{ quote . }}
+        {{- end }}
+      {{- if .groups }}
+      groups:
+        {{- range .groups }}
+        - {{ quote . }}
+        {{- end }}
+      {{- end }}
+    {{- end }}
+  {{- end }}

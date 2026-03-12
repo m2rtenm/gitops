@@ -1,0 +1,69 @@
+namespace: fintech-infra
+topics:
+  - name: fintech-accounts
+    partitions: 3
+    replicationFactor: 3
+    config:
+      min.insync.replicas: 2
+      retention.ms: 604800000
+      segment.ms: 300000
+  
+  - name: fintech-account-events
+    partitions: 3
+    replicationFactor: 3
+    config:
+      min.insync.replicas: 2
+      retention.ms: 604800000
+  
+  - name: fintech-transactions
+    partitions: 5
+    replicationFactor: 3
+    config:
+      min.insync.replicas: 2
+      retention.ms: 2592000000
+      segment.ms: 300000
+  
+  - name: fintech-transaction-events
+    partitions: 3
+    replicationFactor: 3
+    config:
+      min.insync.replicas: 2
+      retention.ms: 604800000
+  
+  - name: fintech-ledger
+    partitions: 3
+    replicationFactor: 3
+    config:
+      min.insync.replicas: 2
+      retention.ms: 31536000000
+      segment.ms: 86400000
+  
+  - name: fintech-ledger-events
+    partitions: 3
+    replicationFactor: 3
+    config:
+      min.insync.replicas: 2
+      retention.ms: 2592000000
+  
+  - name: fintech-settlement
+    partitions: 3
+    replicationFactor: 3
+    config:
+      min.insync.replicas: 2
+      retention.ms: 2592000000
+      segment.ms: 300000
+  
+  - name: fintech-settlement-events
+    partitions: 3
+    replicationFactor: 3
+    config:
+      min.insync.replicas: 2
+      retention.ms: 1209600000
+  
+  - name: fintech-fraud-alerts
+    partitions: 3
+    replicationFactor: 3
+    config:
+      min.insync.replicas: 2
+      retention.ms: 2592000000
+      segment.ms: 300000

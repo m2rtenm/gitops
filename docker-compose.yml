@@ -1,0 +1,162 @@
+services:
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+
+  postgres-accounts:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: accounts_db
+      POSTGRES_USER: accounts_user
+      POSTGRES_PASSWORD: accountspass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_accounts_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U accounts_user -d accounts_db"]
+      interval: 5s
+      timeout: 2s
+      retries: 10
+
+
+  postgres-ledger:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: ledger_db
+      POSTGRES_USER: ledger_user
+      POSTGRES_PASSWORD: ledgerpass
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_ledger_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ledger_user -d ledger_db"]
+      interval: 5s
+      timeout: 2s
+      retries: 10
+
+
+  postgres-audit:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: audit_db
+      POSTGRES_USER: audit_user
+      POSTGRES_PASSWORD: auditpass
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_audit_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U audit_user -d audit_db"]
+      interval: 5s
+      timeout: 2s
+      retries: 10
+
+  account-service:
+    build: ./services/account-service
+    environment:
+      KAFKA_BROKERS: kafka:29092
+      POSTGRES_HOST: postgres-accounts
+      POSTGRES_USER: accounts_user
+      POSTGRES_PASSWORD: accountspass
+      POSTGRES_DB: accounts_db
+      LOG_LEVEL: INFO
+    ports:
+      - "8001:8080"
+    depends_on:
+      kafka:
+        condition: service_started
+      postgres-accounts:
+        condition: service_healthy
+
+  transaction-service:
+    build: ./services/transaction-service
+    environment:
+      KAFKA_BROKERS: kafka:29092
+      POSTGRES_HOST: postgres-accounts
+      POSTGRES_USER: accounts_user
+      POSTGRES_PASSWORD: accountspass
+      POSTGRES_DB: accounts_db
+      LOG_LEVEL: INFO
+    ports:
+      - "8002:8080"
+    depends_on:
+      kafka:
+        condition: service_started
+      postgres-accounts:
+        condition: service_healthy
+
+  ledger-service:
+    build: ./services/ledger-service
+    environment:
+      KAFKA_BROKERS: kafka:29092
+      POSTGRES_HOST: postgres-ledger
+      POSTGRES_USER: ledger_user
+      POSTGRES_PASSWORD: ledgerpass
+      POSTGRES_DB: ledger_db
+      LOG_LEVEL: INFO
+    ports:
+      - "8003:8080"
+    depends_on:
+      kafka:
+        condition: service_started
+      postgres-ledger:
+        condition: service_healthy
+
+  settlement-service:
+    build: ./services/settlement-service
+    environment:
+      KAFKA_BROKERS: kafka:29092
+      POSTGRES_HOST: postgres-ledger
+      POSTGRES_USER: ledger_user
+      POSTGRES_PASSWORD: ledgerpass
+      POSTGRES_DB: ledger_db
+      LOG_LEVEL: INFO
+    ports:
+      - "8004:8080"
+    depends_on:
+      kafka:
+        condition: service_started
+      postgres-ledger:
+        condition: service_healthy
+
+  fraud-detection-service:
+    build: ./services/fraud-detection-service
+    environment:
+      KAFKA_BROKERS: kafka:29092
+      POSTGRES_HOST: postgres-audit
+      POSTGRES_USER: audit_user
+      POSTGRES_PASSWORD: auditpass
+      POSTGRES_DB: audit_db
+      LOG_LEVEL: INFO
+    ports:
+      - "8005:8080"
+    depends_on:
+      kafka:
+        condition: service_started
+      postgres-audit:
+        condition: service_healthy
+
+volumes:
+  postgres_accounts_data:
+  postgres_ledger_data:
+  postgres_audit_data:

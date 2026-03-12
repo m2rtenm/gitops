@@ -1,0 +1,23 @@
+namespace: argocd
+appsetName: default
+project: default
+
+generators:
+  - list:
+      elements: []
+
+syncPolicy:
+  automated:
+    prune: true
+    selfHeal: true
+  syncOptions:
+    - CreateNamespace=true
+
+template:
+  source:
+    repoURL: https://github.com/your-org/gitops
+    targetRevision: main
+    path: charts/base-service
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default

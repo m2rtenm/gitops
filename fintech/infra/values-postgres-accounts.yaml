@@ -1,0 +1,37 @@
+image:
+  repository: postgres
+  tag: "15-alpine"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 5432
+  targetPort: 5432
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+persistence:
+  enabled: true
+  storageClassName: standard
+  size: 10Gi
+  mountPath: /var/lib/postgresql/data
+
+env:
+  POSTGRES_DB: accounts_db
+  POSTGRES_USER: accounts_user
+  POSTGRES_INITDB_ARGS: "-c log_statement=all -c log_min_duration_statement=1000"
+
+backup:
+  enabled: true
+  schedule: "0 2 * * *"
+  retention: 7
+
+monitoring:
+  enabled: true
+  interval: 30s

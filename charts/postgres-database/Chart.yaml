@@ -1,0 +1,6 @@
+apiVersion: v2
+name: postgres-database
+description: Postgres database template chart
+type: application
+version: 1.0.0
+appVersion: "15-alpine"

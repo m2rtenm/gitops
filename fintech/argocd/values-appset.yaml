@@ -1,0 +1,33 @@
+namespace: argocd
+appsetName: fintech-services
+project: fintech
+
+generators:
+  - list:
+      elements:
+        - service: account-service
+          displayName: Account Service
+        - service: transaction-service
+          displayName: Transaction Service
+        - service: ledger-service
+          displayName: Ledger Service
+        - service: settlement-service
+          displayName: Settlement Service
+        - service: fraud-detection-service
+          displayName: Fraud Detection Service
+
+syncPolicy:
+  automated:
+    prune: true
+    selfHeal: true
+  syncOptions:
+    - CreateNamespace=true
+
+template:
+  source:
+    repoURL: https://github.com/your-org/gitops
+    targetRevision: main
+    path: charts/base-service
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: fintech

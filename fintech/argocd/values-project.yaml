@@ -1,0 +1,27 @@
+namespace: argocd
+project:
+  name: fintech
+  description: Fintech Banking System - Account, Transaction, Ledger, Settlement and Fraud Detection
+  sourceRepos:
+    - 'https://github.com/your-org/fintech-services'
+    - 'https://github.com/your-org/gitops'
+  destinations:
+    - namespace: fintech
+      server: https://kubernetes.default.svc
+    - namespace: fintech-infra
+      server: https://kubernetes.default.svc
+  roles:
+    - name: developer
+      description: Developer access to fintech apps
+      policies:
+        - 'p, proj:fintech:developer, applications, get, fintech/*, allow'
+        - 'p, proj:fintech:developer, applications, sync, fintech/*, allow'
+      groups:
+        - 'your-org:fintech-developers'
+    - name: admin
+      description: Admin access to fintech project
+      policies:
+        - 'p, proj:fintech:admin, applications, *, fintech/*, allow'
+        - 'p, proj:fintech:admin, repositories, *, *, allow'
+      groups:
+        - 'your-org:fintech-admins'

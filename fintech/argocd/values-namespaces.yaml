@@ -1,0 +1,9 @@
+namespaces:
+  - name: fintech
+    labels:
+      name: fintech
+      monitoring: enabled
+  - name: fintech-infra
+    labels:
+      name: fintech-infra
+      monitoring: enabled
