@@ -2,24 +2,40 @@
 set -e
 
 echo "================================"
-echo "Fintech System - Local Test"
+echo "Fintech System - Service Tests"
 echo "================================"
 echo ""
 
 BASE_URL="${BASE_URL:-http://localhost:8001}"
 SERVICE="${SERVICE:-account-service}"
+NAMESPACE="${NAMESPACE:-fintech}"
 
 echo "Testing $SERVICE at $BASE_URL"
 echo ""
 
+# Check if curl can reach the service
+if ! curl -s -m 2 "$BASE_URL/health" > /dev/null 2>&1; then
+    echo "ERROR: Cannot reach $BASE_URL"
+    echo ""
+    echo "To run tests with Kubernetes, set up port-forward first:"
+    echo "  kubectl port-forward svc/account-service-base-service 8001:8080 -n $NAMESPACE &"
+    echo ""
+    echo "Or for docker-compose local testing:"
+    echo "  make start-local"
+    echo ""
+    exit 1
+fi
+
 # Test health endpoint
 echo "[1/5] Testing health endpoint..."
-curl -s "$BASE_URL/health" | jq .
+HEALTH=$(curl -s "$BASE_URL/health")
+echo "$HEALTH" | jq . 2>/dev/null || echo "$HEALTH"
 echo ""
 
 # Test readiness endpoint
 echo "[2/5] Testing readiness endpoint..."
-curl -s "$BASE_URL/ready" | jq .
+READY=$(curl -s "$BASE_URL/ready")
+echo "$READY" | jq . 2>/dev/null || echo "$READY"
 echo ""
 
 # Test create account
@@ -31,19 +47,34 @@ ACCOUNT_RESPONSE=$(curl -s -X POST "$BASE_URL/api/v1/accounts" \
     "account_number": "TEST-ACC-001",
     "account_type": "CHECKING"
   }')
-echo "$ACCOUNT_RESPONSE" | jq .
-ACCOUNT_ID=$(echo "$ACCOUNT_RESPONSE" | jq -r '.id')
+
+if echo "$ACCOUNT_RESPONSE" | grep -q "error\|error\|Error"; then
+    echo "ERROR creating account:"
+    echo "$ACCOUNT_RESPONSE" | jq . 2>/dev/null || echo "$ACCOUNT_RESPONSE"
+    exit 1
+fi
+
+echo "$ACCOUNT_RESPONSE" | jq . 2>/dev/null || echo "$ACCOUNT_RESPONSE"
+ACCOUNT_ID=$(echo "$ACCOUNT_RESPONSE" | jq -r '.id // empty' 2>/dev/null)
+
+if [ -z "$ACCOUNT_ID" ] || [ "$ACCOUNT_ID" = "null" ]; then
+    echo "ERROR: Could not extract account ID from response"
+    exit 1
+fi
+
 echo "Created account ID: $ACCOUNT_ID"
 echo ""
 
 # Test get account
 echo "[4/5] Getting account details..."
-curl -s "$BASE_URL/api/v1/accounts/$ACCOUNT_ID" | jq .
+GET_ACCOUNT=$(curl -s "$BASE_URL/api/v1/accounts/$ACCOUNT_ID")
+echo "$GET_ACCOUNT" | jq . 2>/dev/null || echo "$GET_ACCOUNT"
 echo ""
 
 # Test get balance
 echo "[5/5] Getting account balance..."
-curl -s "$BASE_URL/api/v1/accounts/$ACCOUNT_ID/balance" | jq .
+BALANCE=$(curl -s "$BASE_URL/api/v1/accounts/$ACCOUNT_ID/balance")
+echo "$BALANCE" | jq . 2>/dev/null || echo "$BALANCE"
 echo ""
 
 echo "================================"
