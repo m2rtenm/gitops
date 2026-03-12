@@ -27,7 +27,7 @@ template:
   source:
     repoURL: https://github.com/m2rtenm/gitops
     targetRevision: main
-    path: charts/base-service
+    path: .
   destination:
     server: https://kubernetes.default.svc
     namespace: fintech

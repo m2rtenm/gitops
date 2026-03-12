@@ -1,22 +1,33 @@
+{{- $appsetName := .Values.appsetName }}
+{{- $project := .Values.project }}
+{{- $repoURL := .Values.template.source.repoURL }}
+{{- $targetRevision := .Values.template.source.targetRevision }}
+{{- $path := .Values.template.source.path }}
+{{- $destServer := .Values.template.destination.server }}
+{{- $destNamespace := .Values.template.destination.namespace }}
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: {{ .Values.appsetName }}
+  name: {{ $appsetName }}
   namespace: {{ .Values.namespace }}
 spec:
   generators:
     {{- toYaml .Values.generators | nindent 4 }}
   template:
     metadata:
-      name: {{ .Values.appsetName }}-{{ "{{ service }}" }}
+      name: '{{ $appsetName }}-{{ "{{service}}" }}'
     spec:
-      project: {{ .Values.project }}
+      project: {{ $project }}
       source:
-        repoURL: {{ .Values.template.source.repoURL }}
-        targetRevision: {{ .Values.template.source.targetRevision }}
-        path: {{ .Values.template.source.path }}
+        repoURL: {{ $repoURL }}
+        targetRevision: {{ $targetRevision }}
+        path: charts/base-service
+        helm:
+          releaseName: '{{ "{{service}}" }}'
+          valueFiles:
+          - '../../fintech/services/{{ "{{service}}" }}/values.yaml'
       destination:
-        server: {{ .Values.template.destination.server }}
-        namespace: {{ .Values.template.destination.namespace }}
+        server: {{ $destServer }}
+        namespace: {{ $destNamespace }}
       syncPolicy:
         {{- toYaml .Values.syncPolicy | nindent 8 }}
